@@ -2,83 +2,69 @@
 
 Notebook: `notebooks/tsla-data-collection-preprocessing.ipynb`
 
-## 1) 1.1 Environment and Path Configuration (added near beginning)
+## 1) Ablation naming consistency update (Section 8.1–8.4)
 - **What changed**
-  - Added local/Kaggle dual-environment path resolution using `pathlib.Path`.
-  - Added repository-root detection and standard directories (`data/raw`, `data/processed`, `data/sample`, `logs`, `results`).
-  - Added resolved path dictionary with local-first and Kaggle fallback.
-  - Added file/directory existence check cell.
-- **Category**: data loading, reproducibility documentation
+  - Standardized ablation labels to the older naming convention across code and interpretation text:
+    - `C_Add_NewTech_Market`
+    - `D_Full_With_Sentiment`
+  - Updated ordered ablation tables/charts to use the same labels consistently.
+- **Category**: reporting consistency, experiment traceability
 - **Model logic changed?** No
 - **Target construction changed?** No
 - **Manual check before merge**
-  - Run the new path-check cells locally and in Kaggle; confirm all required files resolve as expected.
+  - Re-run Section 8 and confirm result tables/charts no longer mix old/new label conventions.
 
-## 2) Import/Dependency setup cleanup
+## 2) LSTM clarification (documentation-only)
 - **What changed**
-  - Removed notebook magic install commands (e.g., `!pip install ...`) from executable code cells.
-  - Replaced with normal imports and markdown dependency note.
-- **Category**: execution environment, documentation
+  - Added explicit clarification that LSTM is **not** part of the final comparative experiment in this notebook.
+  - No LSTM model was added.
+- **Category**: scope clarification, academic reporting
 - **Model logic changed?** No
 - **Target construction changed?** No
 - **Manual check before merge**
-  - Export notebook to `.py` and confirm no code cell starts with `%` or `!`.
+  - Confirm the notebook text clearly states LSTM exclusion in the comparison discussion.
 
-## 3) Path usage updates in I/O cells
+## 3) Section order fix: moved 7.5 Threshold Tuning before Section 8
 - **What changed**
-  - Replaced hard-coded `/kaggle/input` and `/kaggle/working` paths in key `read_csv`/`to_csv` cells with resolved local/Kaggle-aware paths.
-- **Category**: data loading/preprocessing I/O, reproducibility
+  - Repositioned `7.5 Standardized Threshold Tuning (Validation-Based)` so it appears before `# 8. Ablation Study`.
+  - Threshold logic and selection criteria were kept unchanged.
+- **Category**: notebook structure/readability
 - **Model logic changed?** No
 - **Target construction changed?** No
 - **Manual check before merge**
-  - Confirm these files are correctly read/written:
-    - processed stock CSV
-    - daily sentiment CSV
-    - fused dataset CSV
-    - raw alpha news CSV
+  - Run notebook sequentially and confirm no `NameError` in threshold section.
 
-## 4) 4.7 Alignment Audit for Leakage Prevention (added)
+## 4) Optional SHAP explainability with safe fallback
 - **What changed**
-  - Added explicit time-point explanation for next-day prediction.
-  - Added audit table construction with:
-    - published date
-    - effective trading date
-    - weekend mapping flags/counts
-    - after-hours proxy flags/counts (if intraday timestamps exist)
-  - Added export of audit evidence to `results/alignment_audit.csv`.
-- **Category**: preprocessing auditability, leakage verification, documentation
+  - Added optional explainability cell for Logistic Regression:
+    - Uses SHAP if available and runtime variables exist.
+    - Falls back to absolute Logistic Regression coefficient importance if SHAP is unavailable.
+  - SHAP is not required to run the notebook.
+- **Category**: explainability, robustness
 - **Model logic changed?** No
 - **Target construction changed?** No
 - **Manual check before merge**
-  - Verify weekend/after-hours remap counts look reasonable and non-zero when expected.
-  - Open exported audit CSV and inspect random rows.
+  - Validate both paths:
+    - SHAP installed: explainability plot renders.
+    - SHAP missing: coefficient-importance fallback prints without failure.
 
-## 5) 7.5 Standardized Threshold Tuning (Validation-Based) (added)
+## 5) RAW_DIR creation before Alpha Vantage raw export
 - **What changed**
-  - Added standardized threshold evaluation table over threshold grid.
-  - Uses out-of-fold validation probabilities (when available) and reports:
-    - threshold
-    - accuracy
-    - precision
-    - recall
-    - f1-score
-    - selected threshold flag
-  - Added export to `results/threshold_tuning_validation_oof.csv`.
-- **Category**: model evaluation presentation/auditability
-- **Model logic changed?** No (evaluation presentation layer only)
-- **Target construction changed?** No
-- **Manual check before merge**
-  - Ensure upstream model evaluation cells that produce OOF probabilities run first.
-  - Verify selected threshold criterion matches notebook text (max validation F1).
-
-## 6) Minimum Reproducibility Checklist (added)
-- **What changed**
-  - Added strict checklist documenting required inputs, expected outputs, package requirements, API/internet needs, heavy optional cells, and local/Kaggle run guidance.
-- **Category**: documentation/reproducibility
+  - Added explicit `RAW_DIR.mkdir(parents=True, exist_ok=True)` before writing Alpha Vantage raw CSV.
+- **Category**: I/O safety, reproducibility
 - **Model logic changed?** No
 - **Target construction changed?** No
 - **Manual check before merge**
-  - Confirm checklist remains accurate with current repository files.
+  - Run Section 4.1 export and confirm raw CSV write succeeds in a fresh environment.
+
+## 6) Resolved-path refresh after new artifact generation
+- **What changed**
+  - Added `RESOLVED_PATHS` refresh immediately after generating the new raw Alpha Vantage artifact.
+- **Category**: path management correctness
+- **Model logic changed?** No
+- **Target construction changed?** No
+- **Manual check before merge**
+  - Confirm refreshed `RESOLVED_PATHS['raw_alpha_news']` points to the newly written file.
 
 ---
 
@@ -86,11 +72,20 @@ Notebook: `notebooks/tsla-data-collection-preprocessing.ipynb`
 - **Model training logic**: unchanged
 - **Target definition/meaning**: unchanged
 - **Core feature formulas**: unchanged
-- **Research direction (next-day TSLA movement with sentiment + ML)**: unchanged
+- **TimeSeriesSplit and metrics**: unchanged
 
 ## Recommended reviewer checklist (quick)
-1. Run path config + file existence check cells.
-2. Confirm no magic commands remain in code cells.
-3. Run alignment audit section and inspect `results/alignment_audit.csv`.
-4. Run standardized threshold section and inspect `results/threshold_tuning_validation_oof.csv`.
-5. Confirm core modeling sections and target cells are unchanged semantically.
+1. Confirm only notebook structure/text and optional explainability additions were made.
+2. Run path setup + Alpha Vantage export cell and verify directory creation/path refresh behavior.
+3. Run threshold section before ablation section to verify execution order consistency.
+4. Run ablation section and confirm old naming convention appears consistently.
+5. Run optional explainability cell and confirm graceful SHAP fallback behavior.
+
+
+## 7) Final consistency wording fix (documentation-only)
+- **What changed**
+  - Updated Section 10 conclusion to use old ablation labels consistently (`C_Add_NewTech_Market`, `D_Full_With_Sentiment`).
+  - Reconciled Section 8.3 and Section 8.4 wording so the top F1/Accuracy statements match the ablation results already reported in the notebook outputs.
+- **Category**: documentation consistency
+- **Model logic changed?** No
+- **Target construction changed?** No
