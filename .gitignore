@@ -1,0 +1,33 @@
+# macOS
+.DS_Store
+
+# Python caches
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Local secrets and environment files
+.env
+.env.*
+!.env.example
+
+# Logs and local runtime output
+logs/
+*.log
+
+# Archived/debug artifacts not needed in the main repository
+archive/
+
+# Generated document render previews
+report_assets/docx_render/
