@@ -46,6 +46,7 @@ MARKET_FIELD_MAP = {
     "Volume": "Volume",
 }
 FINBERT_MODEL = "ProsusAI/finbert"
+FINBERT_FALLBACK_WARNING = "finbert_unavailable_used_neutral_sentiment_fallback"
 
 TECHNICAL_COLUMNS = [
     "MA7", "MA14", "EMA12", "EMA26",
@@ -101,6 +102,10 @@ def fail(message: str, exit_code: int = 1, **extra: Any) -> None:
     payload.update(extra)
     print(json.dumps(payload, ensure_ascii=False, indent=2))
     raise SystemExit(exit_code)
+
+
+class OptionalSentimentUnavailable(RuntimeError):
+    """Raised when optional live-news sentiment scoring cannot run."""
 
 
 def require_runtime():
@@ -295,7 +300,9 @@ def run_finbert(texts):
     try:
         from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
     except ImportError as exc:
-        fail("transformers and torch are required to compute FinBERT sentiment for live input.", missing_dependency=str(exc))
+        raise OptionalSentimentUnavailable(
+            "transformers and torch are required to compute FinBERT sentiment for live input."
+        ) from exc
 
     try:
         tokenizer = AutoTokenizer.from_pretrained(FINBERT_MODEL, local_files_only=True)
@@ -305,12 +312,10 @@ def run_finbert(texts):
             use_safetensors=False,
         )
     except OSError as exc:
-        fail(
+        raise OptionalSentimentUnavailable(
             "FinBERT model files are not available in the local Hugging Face cache. "
-            "This script does not download model files automatically.",
-            model=FINBERT_MODEL,
-            detail=str(exc),
-        )
+            "Using neutral latest-news sentiment fallback."
+        ) from exc
     sentiment_pipeline = pipeline("sentiment-analysis", model=model, tokenizer=tokenizer)
     return sentiment_pipeline(texts, truncation=True)
 
@@ -334,7 +339,12 @@ def aggregate_latest_news(news_df, cutoff):
         return build_zero_sentiment_features(), warnings + ["no_news_at_or_before_prediction_cutoff"]
 
     texts = (df["title"].fillna("").astype(str) + ". " + df["summary"].fillna("").astype(str)).str.strip().tolist()
-    sentiment_results = run_finbert(texts)
+    try:
+        sentiment_results = run_finbert(texts)
+    except OptionalSentimentUnavailable:
+        return build_neutral_sentiment_features(len(texts)), sorted(
+            set(warnings + [FINBERT_FALLBACK_WARNING])
+        )
     labels = [item["label"].lower() for item in sentiment_results]
     confidence = np.array([float(item["score"]) for item in sentiment_results])
     score_map = {"positive": 1, "neutral": 0, "negative": -1}
@@ -381,6 +391,18 @@ def build_zero_sentiment_features():
         "strong_negative_count": 0,
         "net_sentiment": 0.0,
     }
+
+
+def build_neutral_sentiment_features(news_count: int):
+    features = build_zero_sentiment_features()
+    features.update(
+        {
+            "neutral_ratio": 1.0 if news_count else 0.0,
+            "neutral_count": news_count,
+            "news_count": news_count,
+        }
+    )
+    return features
 
 
 def build_live_feature_row(market_features, sentiment_features):
