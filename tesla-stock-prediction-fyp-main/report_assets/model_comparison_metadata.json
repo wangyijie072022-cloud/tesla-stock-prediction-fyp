@@ -1,0 +1,21 @@
+{
+  "source": "regenerated_from_current_project_scripts",
+  "notebook_original_comparison_output_found": false,
+  "reason": "Current notebook and results folder preserve only final Logistic Regression plus baselines.",
+  "data_path": "data/processed/tsla_fused_dataset.csv",
+  "same_feature_matrix_as_training_script": true,
+  "feature_count": 67,
+  "train_rows": 799,
+  "holdout_rows": 200,
+  "holdout_start": "2024-01-10",
+  "holdout_end": "2024-12-30",
+  "evaluated_models": [
+    "Logistic Regression",
+    "Support Vector Machine",
+    "K-Nearest Neighbors",
+    "Random Forest",
+    "Gradient Boosting",
+    "Decision Tree"
+  ],
+  "output_path": "report_assets/model_comparison_metrics_regenerated.csv"
+}
