@@ -1,0 +1,552 @@
+{
+  "model_status": "experimental_research_only",
+  "experimental": true,
+  "scope": "TSLA-only US equity research model",
+  "not_financial_advice": true,
+  "training_data_path": "data/processed/tsla_fused_dataset.csv",
+  "train_date_range": {
+    "start": "2020-01-31",
+    "end": "2024-12-30"
+  },
+  "evaluation_split": {
+    "final_holdout_fraction": 0.2,
+    "train_tune": {
+      "start": "2020-01-31",
+      "end": "2024-01-08",
+      "rows": 799
+    },
+    "strict_final_20pct_holdout": {
+      "start": "2024-01-10",
+      "end": "2024-12-30",
+      "rows": 200
+    },
+    "validation_oof": {
+      "start": "2020-09-16",
+      "end": "2024-01-08",
+      "rows": 665
+    },
+    "oof_holdout_overlap_date_count": 0,
+    "oof_holdout_overlap_dates": []
+  },
+  "row_count": 999,
+  "feature_count": 67,
+  "feature_columns_path": "models/feature_columns.json",
+  "feature_set_name": "TSLA_Experimental_Current61_Plus_Conservative_TSLA_State",
+  "base_feature_count": 61,
+  "included_experimental_features": [
+    "tsla_residual_return_vs_qqq",
+    "gap_open_prev_close",
+    "volume_shock_20",
+    "rolling_volatility_20",
+    "distance_to_20d_high",
+    "distance_to_20d_low"
+  ],
+  "included_experimental_feature_formulas": {
+    "tsla_residual_return_vs_qqq": "TSLA return_1 - rolling 60-day beta(TSLA, QQQ) * QQQ return_1; beta is not saved as a model feature.",
+    "gap_open_prev_close": "TSLA_Open / previous TSLA_Close - 1.",
+    "volume_shock_20": "1 when abs(TSLA volume z-score versus trailing 20 trading days) >= 2, else 0.",
+    "rolling_volatility_20": "Trailing 20-trading-day standard deviation of TSLA close-to-close return.",
+    "distance_to_20d_high": "TSLA_Close / trailing 20-trading-day high - 1.",
+    "distance_to_20d_low": "TSLA_Close / trailing 20-trading-day low - 1."
+  },
+  "excluded_candidate_features": {
+    "tsla_rolling_beta_to_qqq": "Diagnostic results showed mixed behavior; beta is used internally to compute residual return but excluded as a model feature.",
+    "market_state": "Market-state group was unstable and often dragged 5-day target diagnostics.",
+    "all_new_features": "All-feature bundle increased noise and was not stable across walk-forward windows.",
+    "event_window_pre_features": "Reliable earnings/delivery/FOMC calendars are not present locally; pre-window features would risk future event-date leakage.",
+    "intraday_reversal": "Single-feature diagnostics showed calibration/accuracy drag; excluded by default.",
+    "previous_large_up": "Not stable enough to include by default.",
+    "previous_large_down": "Single-feature diagnostics showed worse PR AUC/Brier behavior; excluded by default."
+  },
+  "forbidden_feature_columns": [
+    "Next_Day_Close",
+    "Next_Day_Return",
+    "QQQ_forward_return_1d",
+    "QQQ_forward_return_5d",
+    "SPY_forward_return_1d",
+    "SPY_forward_return_5d",
+    "TSLA_forward_return_1d",
+    "TSLA_forward_return_3d",
+    "TSLA_forward_return_5d",
+    "Target"
+  ],
+  "model_type": "StandardScaler + LogisticRegression (TSLA Experimental Research Model)",
+  "model_params": {
+    "C": 0.1,
+    "penalty": "l1",
+    "solver": "liblinear",
+    "class_weight": "balanced"
+  },
+  "selected_threshold": 0.3,
+  "recommended_conservative_threshold": 0.5,
+  "validation_metrics": {
+    "cv_strategy": "Pre-holdout TimeSeriesSplit(n_splits=5, gap=1)",
+    "inner_param_search_strategy": "Pre-holdout TimeSeriesSplit(n_splits=4, gap=1)",
+    "threshold_results_path": "results/threshold_tuning_validation_oof.csv",
+    "production_candidate_metrics_path": "results/tsla_production_candidate_metrics.csv",
+    "production_candidate_summary_path": "results/tsla_production_candidate_summary.md",
+    "default_threshold_oof_metrics": {
+      "accuracy": 0.49774436090225566,
+      "precision": 0.5175438596491229,
+      "recall": 0.5115606936416185,
+      "f1_score": 0.5145348837209303,
+      "balanced_accuracy": 0.4971596571656368,
+      "roc_auc": 0.507374925254136,
+      "pr_auc": 0.5489232705897679,
+      "brier_score": 0.25048816366172805
+    },
+    "selected_threshold_oof_metrics": {
+      "accuracy": 0.5203007518796993,
+      "precision": 0.5203007518796993,
+      "recall": 1.0,
+      "f1_score": 0.6844708209693373,
+      "balanced_accuracy": 0.5,
+      "roc_auc": 0.507374925254136,
+      "pr_auc": 0.5489232705897679,
+      "brier_score": 0.25048816366172805
+    },
+    "strict_final_20pct_holdout": {
+      "split": {
+        "train_start_date": "2020-01-31",
+        "train_end_date": "2024-01-08",
+        "holdout_start_date": "2024-01-10",
+        "holdout_end_date": "2024-12-30",
+        "train_rows": 799,
+        "holdout_rows": 200
+      },
+      "model_default_threshold": {
+        "scope": "strict_final_20pct_holdout",
+        "name": "model_default_threshold_0p5",
+        "kind": "model",
+        "threshold": 0.5,
+        "train_rows": 799,
+        "test_rows": 200,
+        "train_start_date": "2020-01-31",
+        "train_end_date": "2024-01-08",
+        "test_start_date": "2024-01-10",
+        "test_end_date": "2024-12-30",
+        "predicted_up_ratio": 0.525,
+        "actual_up_ratio": 0.495,
+        "accuracy": 0.54,
+        "precision": 0.5333333333333333,
+        "recall": 0.5656565656565656,
+        "f1_score": 0.5490196078431373,
+        "balanced_accuracy": 0.5402540254025403,
+        "roc_auc": 0.5317531753175316,
+        "pr_auc": 0.5498436211883136,
+        "brier_score": 0.25060026635979843
+      },
+      "best_baseline": {
+        "scope": "strict_final_20pct_holdout",
+        "name": "tsla_relative_to_qqq_momentum",
+        "kind": "baseline",
+        "threshold": "",
+        "train_rows": 799,
+        "test_rows": 200,
+        "train_start_date": "2020-01-31",
+        "train_end_date": "2024-01-08",
+        "test_start_date": "2024-01-10",
+        "test_end_date": "2024-12-30",
+        "predicted_up_ratio": 0.5,
+        "actual_up_ratio": 0.495,
+        "accuracy": 0.525,
+        "precision": 0.52,
+        "recall": 0.5252525252525253,
+        "f1_score": 0.5226130653266332,
+        "balanced_accuracy": 0.525002500250025,
+        "roc_auc": 0.525002500250025,
+        "pr_auc": 0.5081313131313131,
+        "brier_score": 0.475
+      },
+      "delta_accuracy_vs_best_baseline": 0.015000000000000013,
+      "delta_roc_auc_vs_best_baseline": 0.006750675067506595
+    },
+    "fold_metrics_default_threshold": [
+      {
+        "accuracy": 0.48120300751879697,
+        "precision": 0.5064935064935064,
+        "recall": 0.5571428571428572,
+        "f1_score": 0.5306122448979592,
+        "fold": 1,
+        "train_size": 133,
+        "test_size": 133,
+        "train_start_date": "2020-01-31",
+        "train_end_date": "2020-09-14",
+        "test_start_date": "2020-09-16",
+        "test_end_date": "2021-04-27"
+      },
+      {
+        "accuracy": 0.49624060150375937,
+        "precision": 0.5396825396825397,
+        "recall": 0.4722222222222222,
+        "f1_score": 0.5037037037037037,
+        "fold": 2,
+        "train_size": 266,
+        "test_size": 133,
+        "train_start_date": "2020-01-31",
+        "train_end_date": "2021-04-26",
+        "test_start_date": "2021-04-28",
+        "test_end_date": "2022-01-14"
+      },
+      {
+        "accuracy": 0.5037593984962406,
+        "precision": 0.5531914893617021,
+        "recall": 0.36619718309859156,
+        "f1_score": 0.4406779661016949,
+        "fold": 3,
+        "train_size": 399,
+        "test_size": 133,
+        "train_start_date": "2020-01-31",
+        "train_end_date": "2022-01-13",
+        "test_start_date": "2022-01-18",
+        "test_end_date": "2022-09-12"
+      },
+      {
+        "accuracy": 0.5037593984962406,
+        "precision": 0.47126436781609193,
+        "recall": 0.6721311475409836,
+        "f1_score": 0.5540540540540541,
+        "fold": 4,
+        "train_size": 532,
+        "test_size": 133,
+        "train_start_date": "2020-01-31",
+        "train_end_date": "2022-09-09",
+        "test_start_date": "2022-09-13",
+        "test_end_date": "2023-05-08"
+      },
+      {
+        "accuracy": 0.5037593984962406,
+        "precision": 0.5441176470588235,
+        "recall": 0.5138888888888888,
+        "f1_score": 0.5285714285714286,
+        "fold": 5,
+        "train_size": 665,
+        "test_size": 133,
+        "train_start_date": "2020-01-31",
+        "train_end_date": "2023-05-05",
+        "test_start_date": "2023-05-10",
+        "test_end_date": "2024-01-08"
+      }
+    ],
+    "fold_metric_summary_default_threshold": {
+      "accuracy_mean": 0.4977443609022556,
+      "accuracy_std": 0.008768348714053105,
+      "precision_mean": 0.5229499100825328,
+      "precision_std": 0.030281398903576756,
+      "recall_mean": 0.5163164597787087,
+      "recall_std": 0.1004300789218699,
+      "f1_score_mean": 0.511523879465768,
+      "f1_score_std": 0.03884352961622361
+    },
+    "threshold_grid": [
+      {
+        "probability_threshold": 0.3,
+        "accuracy": 0.5203007518796993,
+        "precision": 0.5203007518796993,
+        "recall": 1.0,
+        "f1_score": 0.6844708209693373,
+        "selected_probability_threshold": 1
+      },
+      {
+        "probability_threshold": 0.32,
+        "accuracy": 0.5203007518796993,
+        "precision": 0.5203007518796993,
+        "recall": 1.0,
+        "f1_score": 0.6844708209693373,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.34,
+        "accuracy": 0.5203007518796993,
+        "precision": 0.5203007518796993,
+        "recall": 1.0,
+        "f1_score": 0.6844708209693373,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.36,
+        "accuracy": 0.5203007518796993,
+        "precision": 0.5203007518796993,
+        "recall": 1.0,
+        "f1_score": 0.6844708209693373,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.38,
+        "accuracy": 0.518796992481203,
+        "precision": 0.5195783132530121,
+        "recall": 0.9971098265895953,
+        "f1_score": 0.6831683168316832,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.4,
+        "accuracy": 0.5203007518796993,
+        "precision": 0.5203619909502263,
+        "recall": 0.9971098265895953,
+        "f1_score": 0.6838453914767096,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.42,
+        "accuracy": 0.518796992481203,
+        "precision": 0.5200617283950617,
+        "recall": 0.9739884393063584,
+        "f1_score": 0.6780684104627767,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.44,
+        "accuracy": 0.5263157894736842,
+        "precision": 0.5248796147672552,
+        "recall": 0.9450867052023122,
+        "f1_score": 0.6749226006191951,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.46,
+        "accuracy": 0.518796992481203,
+        "precision": 0.5235507246376812,
+        "recall": 0.8352601156069365,
+        "f1_score": 0.643652561247216,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.48,
+        "accuracy": 0.5037593984962406,
+        "precision": 0.5169491525423728,
+        "recall": 0.7052023121387283,
+        "f1_score": 0.5965770171149144,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.5,
+        "accuracy": 0.49774436090225566,
+        "precision": 0.5175438596491229,
+        "recall": 0.5115606936416185,
+        "f1_score": 0.5145348837209303,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.52,
+        "accuracy": 0.4992481203007519,
+        "precision": 0.5317073170731708,
+        "recall": 0.315028901734104,
+        "f1_score": 0.3956442831215971,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.54,
+        "accuracy": 0.5022556390977444,
+        "precision": 0.5688073394495413,
+        "recall": 0.1791907514450867,
+        "f1_score": 0.2725274725274725,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.56,
+        "accuracy": 0.49624060150375937,
+        "precision": 0.6037735849056604,
+        "recall": 0.09248554913294797,
+        "f1_score": 0.16040100250626566,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.58,
+        "accuracy": 0.4932330827067669,
+        "precision": 0.7142857142857143,
+        "recall": 0.04335260115606936,
+        "f1_score": 0.08174386920980926,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.6,
+        "accuracy": 0.49022556390977445,
+        "precision": 0.8181818181818182,
+        "recall": 0.02601156069364162,
+        "f1_score": 0.05042016806722689,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.62,
+        "accuracy": 0.48120300751879697,
+        "precision": 0.6666666666666666,
+        "recall": 0.005780346820809248,
+        "f1_score": 0.011461318051575931,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.64,
+        "accuracy": 0.48120300751879697,
+        "precision": 1.0,
+        "recall": 0.002890173410404624,
+        "f1_score": 0.005763688760806916,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.66,
+        "accuracy": 0.47969924812030074,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1_score": 0.0,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.68,
+        "accuracy": 0.47969924812030074,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1_score": 0.0,
+        "selected_probability_threshold": 0
+      },
+      {
+        "probability_threshold": 0.7,
+        "accuracy": 0.47969924812030074,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1_score": 0.0,
+        "selected_probability_threshold": 0
+      }
+    ],
+    "lr_param_search_results": [
+      {
+        "C": 0.1,
+        "penalty": "l1",
+        "solver": "liblinear",
+        "class_weight": "balanced",
+        "Accuracy_Mean": 0.5078616352201258,
+        "F1_Mean": 0.5099140910524449
+      },
+      {
+        "C": 0.1,
+        "penalty": "l1",
+        "solver": "liblinear",
+        "class_weight": "None",
+        "Accuracy_Mean": 0.5,
+        "F1_Mean": 0.5217370969748029
+      },
+      {
+        "C": 10.0,
+        "penalty": "l1",
+        "solver": "liblinear",
+        "class_weight": "None",
+        "Accuracy_Mean": 0.4968553459119497,
+        "F1_Mean": 0.5326452100198042
+      },
+      {
+        "C": 10.0,
+        "penalty": "l1",
+        "solver": "liblinear",
+        "class_weight": "balanced",
+        "Accuracy_Mean": 0.4952830188679246,
+        "F1_Mean": 0.4981565940814283
+      },
+      {
+        "C": 10.0,
+        "penalty": "l2",
+        "solver": "liblinear",
+        "class_weight": "balanced",
+        "Accuracy_Mean": 0.4937106918238994,
+        "F1_Mean": 0.49410724552844776
+      },
+      {
+        "C": 10.0,
+        "penalty": "l2",
+        "solver": "liblinear",
+        "class_weight": "None",
+        "Accuracy_Mean": 0.49056603773584906,
+        "F1_Mean": 0.5190708772740446
+      },
+      {
+        "C": 1.0,
+        "penalty": "l2",
+        "solver": "liblinear",
+        "class_weight": "balanced",
+        "Accuracy_Mean": 0.48899371069182396,
+        "F1_Mean": 0.5015389893221036
+      },
+      {
+        "C": 1.0,
+        "penalty": "l2",
+        "solver": "liblinear",
+        "class_weight": "None",
+        "Accuracy_Mean": 0.48427672955974843,
+        "F1_Mean": 0.5265085305584223
+      },
+      {
+        "C": 0.01,
+        "penalty": "l2",
+        "solver": "liblinear",
+        "class_weight": "balanced",
+        "Accuracy_Mean": 0.48427672955974843,
+        "F1_Mean": 0.4636791730121903
+      },
+      {
+        "C": 0.01,
+        "penalty": "l1",
+        "solver": "liblinear",
+        "class_weight": "None",
+        "Accuracy_Mean": 0.48270440251572333,
+        "F1_Mean": 0.0
+      },
+      {
+        "C": 0.01,
+        "penalty": "l1",
+        "solver": "liblinear",
+        "class_weight": "balanced",
+        "Accuracy_Mean": 0.48270440251572333,
+        "F1_Mean": 0.0
+      },
+      {
+        "C": 0.1,
+        "penalty": "l2",
+        "solver": "liblinear",
+        "class_weight": "balanced",
+        "Accuracy_Mean": 0.479559748427673,
+        "F1_Mean": 0.48867901460969493
+      },
+      {
+        "C": 1.0,
+        "penalty": "l1",
+        "solver": "liblinear",
+        "class_weight": "None",
+        "Accuracy_Mean": 0.4779874213836478,
+        "F1_Mean": 0.514792648688502
+      },
+      {
+        "C": 1.0,
+        "penalty": "l1",
+        "solver": "liblinear",
+        "class_weight": "balanced",
+        "Accuracy_Mean": 0.4748427672955975,
+        "F1_Mean": 0.4743751086500235
+      },
+      {
+        "C": 0.1,
+        "penalty": "l2",
+        "solver": "liblinear",
+        "class_weight": "None",
+        "Accuracy_Mean": 0.47012578616352196,
+        "F1_Mean": 0.5090780419537461
+      },
+      {
+        "C": 0.01,
+        "penalty": "l2",
+        "solver": "liblinear",
+        "class_weight": "None",
+        "Accuracy_Mean": 0.46855345911949686,
+        "F1_Mean": 0.4910209586908298
+      }
+    ]
+  },
+  "created_at": "2026-05-18T03:25:24.815351+00:00",
+  "notes": [
+    "Parameter selection, OOF probabilities, and threshold tuning use only the pre-holdout train/tune window.",
+    "Strict final 20% holdout is evaluated once after all selection and threshold tuning are complete.",
+    "Saved final artifact is fitted on the full historical dataset after strict holdout evaluation for future inference only.",
+    "No notebooks or data/processed files are modified by this script.",
+    "The threshold tuning CSV and model threshold artifacts are written from the same pre-holdout OOF table.",
+    "This artifact is experimental/research-only and must not be described as a reliable trading signal.",
+    "The UI defaults to the conservative 0.5 threshold; the selected research threshold is retained for validation diagnostics."
+  ]
+}
