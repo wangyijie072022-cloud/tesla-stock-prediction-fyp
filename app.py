@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import html
 import json
 import pickle
 import subprocess
@@ -416,6 +417,387 @@ def section_header(title: str, caption: str | None = None) -> None:
         st.caption(caption)
 
 
+def inject_custom_css() -> None:
+    st.markdown(
+        """
+        <style>
+        :root {
+            --tesla-red: #E82127;
+            --ink: #171A20;
+            --muted: #5C6470;
+            --line: #E6E8EC;
+            --panel: #FFFFFF;
+            --soft: #F4F5F7;
+            --success: #128A48;
+        }
+
+        .stApp {
+            background: linear-gradient(180deg, #FBFBFC 0%, #F3F4F6 100%);
+            color: var(--ink);
+        }
+
+        .block-container {
+            padding-top: 2.25rem;
+            padding-bottom: 3rem;
+            max-width: 1280px;
+        }
+
+        h1, h2, h3 {
+            letter-spacing: 0;
+            color: var(--ink);
+        }
+
+        div[data-testid="stMetric"] {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 1rem 1rem 0.85rem;
+            box-shadow: 0 8px 22px rgba(23, 26, 32, 0.05);
+        }
+
+        div[data-testid="stMetricValue"] {
+            color: var(--ink);
+        }
+
+        section[data-testid="stSidebar"] {
+            background: #111318;
+            border-right: 1px solid #242832;
+        }
+
+        section[data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+        section[data-testid="stSidebar"] label,
+        section[data-testid="stSidebar"] span {
+            color: #E9ECEF;
+        }
+
+        .sidebar-brand {
+            border-bottom: 1px solid rgba(255,255,255,0.12);
+            margin-bottom: 1.1rem;
+            padding: 0.35rem 0 1rem;
+        }
+
+        .sidebar-logo {
+            color: #FFFFFF;
+            font-weight: 800;
+            font-size: 1.55rem;
+            line-height: 1.15;
+        }
+
+        .sidebar-accent {
+            color: var(--tesla-red);
+        }
+
+        .sidebar-subtitle {
+            color: #A8AFBA;
+            font-size: 0.84rem;
+            line-height: 1.35;
+            margin-top: 0.45rem;
+        }
+
+        .tsla-hero {
+            background:
+                radial-gradient(circle at top right, rgba(232,33,39,0.14), transparent 34%),
+                linear-gradient(135deg, #FFFFFF 0%, #F6F7F9 100%);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            box-shadow: 0 16px 38px rgba(23, 26, 32, 0.08);
+            padding: 1.65rem 1.75rem;
+            margin-bottom: 1.45rem;
+        }
+
+        .hero-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1.25rem;
+            flex-wrap: wrap;
+        }
+
+        .word-logo {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 132px;
+            border: 2px solid var(--tesla-red);
+            color: var(--tesla-red);
+            border-radius: 6px;
+            padding: 0.42rem 0.7rem;
+            font-size: 1.75rem;
+            font-weight: 900;
+            letter-spacing: 0.08em;
+        }
+
+        .hero-copy h1 {
+            margin: 0.8rem 0 0.4rem;
+            font-size: 2.1rem;
+            line-height: 1.15;
+            font-weight: 800;
+        }
+
+        .hero-copy p {
+            margin: 0;
+            color: var(--muted);
+            font-size: 1.02rem;
+        }
+
+        .research-pill {
+            display: inline-flex;
+            align-items: center;
+            border: 1px solid rgba(232,33,39,0.28);
+            background: rgba(232,33,39,0.08);
+            color: #B4151B;
+            border-radius: 999px;
+            padding: 0.35rem 0.7rem;
+            font-size: 0.82rem;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .metric-card {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            box-shadow: 0 10px 24px rgba(23, 26, 32, 0.055);
+            padding: 1rem;
+            min-height: 142px;
+            margin-bottom: 0.35rem;
+        }
+
+        .metric-card-title {
+            color: var(--muted);
+            font-size: 0.78rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.45rem;
+        }
+
+        .metric-card-value {
+            color: var(--ink);
+            font-size: 1.18rem;
+            line-height: 1.25;
+            font-weight: 800;
+            overflow-wrap: anywhere;
+            margin-bottom: 0.6rem;
+        }
+
+        .metric-card-caption {
+            color: var(--muted);
+            font-size: 0.84rem;
+            line-height: 1.35;
+        }
+
+        .section-panel {
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            box-shadow: 0 10px 24px rgba(23, 26, 32, 0.045);
+            padding: 1.15rem 1.25rem;
+            margin: 1rem 0 1.25rem;
+        }
+
+        .section-panel h3 {
+            margin: 0 0 0.65rem;
+            font-size: 1.18rem;
+        }
+
+        .section-panel p {
+            color: #3F4650;
+            line-height: 1.65;
+            margin: 0;
+        }
+
+        .status-card {
+            border-radius: 8px;
+            padding: 1rem 1.15rem;
+            border: 1px solid rgba(18,138,72,0.24);
+            background: #F0FAF4;
+            color: #0B5B31;
+            margin: 0.65rem 0 1rem;
+        }
+
+        .status-card.warning {
+            border-color: rgba(232,33,39,0.20);
+            background: #FFF4F4;
+            color: #9A181D;
+        }
+
+        .styled-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 10px 24px rgba(23, 26, 32, 0.045);
+            margin: 0.65rem 0 1.1rem;
+        }
+
+        .styled-table th {
+            background: #F3F4F6;
+            color: #3E4651;
+            font-size: 0.78rem;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            text-align: left;
+            padding: 0.78rem 0.85rem;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .styled-table td {
+            padding: 0.78rem 0.85rem;
+            border-bottom: 1px solid #EEF0F3;
+            color: #2E3440;
+            vertical-align: top;
+            font-size: 0.92rem;
+            overflow-wrap: anywhere;
+        }
+
+        .styled-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 0.18rem 0.55rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            border: 1px solid #CCD2DA;
+            background: #F8F9FB;
+            color: #49515C;
+            white-space: nowrap;
+        }
+
+        .status-badge.available {
+            border-color: rgba(18,138,72,0.22);
+            background: #EAF7EF;
+            color: var(--success);
+        }
+
+        .status-badge.missing {
+            border-color: rgba(232,33,39,0.22);
+            background: #FFF0F1;
+            color: #B4151B;
+        }
+
+        .table-note {
+            color: var(--muted);
+            font-size: 0.91rem;
+            line-height: 1.45;
+            margin: -0.2rem 0 0.35rem;
+        }
+
+        @media (max-width: 900px) {
+            .hero-copy h1 {
+                font-size: 1.65rem;
+            }
+            .word-logo {
+                font-size: 1.35rem;
+                min-width: 110px;
+            }
+            .metric-card {
+                min-height: 128px;
+            }
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def html_text(value: object) -> str:
+    if value is None:
+        return ""
+    try:
+        if pd.isna(value):
+            return ""
+    except (TypeError, ValueError):
+        pass
+    return html.escape(str(value))
+
+
+def render_hero() -> None:
+    st.markdown(
+        """
+        <div class="tsla-hero">
+          <div class="hero-row">
+            <div>
+              <div class="word-logo">TESLA</div>
+              <div class="hero-copy">
+                <h1>TSLA Next-Day Stock Movement Prediction</h1>
+                <p>Technical indicators + FinBERT-based news sentiment + time-aware validation</p>
+              </div>
+            </div>
+            <div class="research-pill">Research use only</div>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_metric_card(title: str, value: str, caption: str) -> None:
+    st.markdown(
+        f"""
+        <div class="metric-card">
+          <div class="metric-card-title">{html_text(title)}</div>
+          <div class="metric-card-value">{html_text(value)}</div>
+          <div class="metric-card-caption">{html_text(caption)}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_section_card(title: str, body_html: str) -> None:
+    st.markdown(
+        f"""
+        <div class="section-panel">
+          <h3>{html_text(title)}</h3>
+          <p>{body_html}</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def render_status_badge(value: object) -> str:
+    text = html_text(value)
+    css_class = text.strip().lower().replace(" ", "-")
+    return f'<span class="status-badge {css_class}">{text}</span>'
+
+
+def render_status_message(success: bool, success_text: str, warning_text: str) -> None:
+    if success:
+        card_class = "status-card"
+        body = success_text
+    else:
+        card_class = "status-card warning"
+        body = warning_text
+    st.markdown(f'<div class="{card_class}">{html_text(body)}</div>', unsafe_allow_html=True)
+
+
+def render_status_table(rows: list[dict[str, object]]) -> None:
+    columns = ["file", "path", "status", "required_status", "role", "last_modified", "size_kb"]
+    headers = "".join(f"<th>{html_text(column)}</th>" for column in columns)
+    body_rows = []
+    for row in rows:
+        cells = []
+        for column in columns:
+            if column == "status":
+                cells.append(f"<td>{render_status_badge(row.get(column))}</td>")
+            else:
+                cells.append(f"<td>{html_text(row.get(column))}</td>")
+        body_rows.append(f"<tr>{''.join(cells)}</tr>")
+    st.markdown(
+        f'<table class="styled-table"><thead><tr>{headers}</tr></thead><tbody>{"".join(body_rows)}</tbody></table>',
+        unsafe_allow_html=True,
+    )
+
+
 def render_file_update_table() -> None:
     rows = [
         file_status_row("Fused dataset", FILES["fused"], "processed", "required output"),
@@ -424,11 +806,11 @@ def render_file_update_table() -> None:
         file_status_row("Alignment audit", FILES["alignment"], "results", "required result"),
         file_status_row("Threshold tuning", FILES["threshold"], "results", "required result"),
     ]
-    show_dataframe(pd.DataFrame(rows))
+    render_status_table(rows)
 
 
 def render_overview() -> None:
-    section_header("Overview", "Read-only project dashboard for the TSLA next-day movement prediction study.")
+    render_hero()
 
     fused = load_csv(FILES["fused"])
     sentiment = load_csv(FILES["sentiment"])
@@ -441,27 +823,57 @@ def render_overview() -> None:
     artifacts = model_artifacts()
 
     col1, col2, col3, col4 = st.columns(4)
-    col1.metric("Fused date range", date_range_text(fused.df))
-    col2.metric("Daily sentiment range", date_range_text(sentiment.df))
-    col3.metric("Offline reproducibility inputs", "available" if required_available else "incomplete")
-    col4.metric("Model artifact", f"{len(artifacts)} found" if artifacts else "not available")
+    with col1:
+        render_metric_card(
+            "Fused date range",
+            date_range_text(fused.df),
+            "Main modelling table used for the direction-classification experiment.",
+        )
+    with col2:
+        render_metric_card(
+            "Daily sentiment range",
+            date_range_text(sentiment.df),
+            "Aggregated Tesla news sentiment coverage for model features.",
+        )
+    with col3:
+        render_metric_card(
+            "Offline reproducibility inputs",
+            "available" if required_available else "incomplete",
+            "Required raw caches, processed outputs, and result artifacts.",
+        )
+    with col4:
+        render_metric_card(
+            "Model artifact",
+            f"{len(artifacts)} found" if artifacts else "not available",
+            "Saved model and metadata available for local review.",
+        )
 
-    st.subheader("Project Summary")
-    st.write(
-        "This project predicts Tesla next-day stock movement direction using technical market features, "
-        "FinBERT-based news sentiment features, time-aware validation, and threshold tuning. "
-        "This dashboard only reads existing local CSV artifacts and does not fetch data, retrain models, "
-        "or regenerate processed/results files."
+    render_section_card(
+        "Project Summary",
+        (
+            "This Final Year Project studies <strong>Tesla</strong> "
+            "<strong>next-day movement direction</strong> prediction using "
+            "<strong>technical market features</strong>, "
+            "<strong>FinBERT-based sentiment</strong>, "
+            "<strong>time-aware validation</strong>, and "
+            "<strong>threshold tuning</strong>. The dashboard is designed as a "
+            "read-only research interface over existing local CSV artifacts and saved model outputs."
+        ),
     )
 
     st.subheader("Processed / Results Update Time")
+    st.markdown(
+        '<div class="table-note">Availability and modified time for the core processed datasets and evaluation artifacts used by the dashboard.</div>',
+        unsafe_allow_html=True,
+    )
     render_file_update_table()
 
     st.subheader("Reproducibility Status")
-    if required_available:
-        st.success("Required raw caches, processed datasets and result CSVs are present for local review and offline rerun preparation.")
-    else:
-        st.warning("Some required files are missing. The dashboard can still render available sections, but full local reproducibility is incomplete.")
+    render_status_message(
+        required_available,
+        "Required raw caches, processed datasets, and result CSVs are present for local review and offline rerun preparation.",
+        "Some required files are missing. The dashboard can still render available sections, but full local reproducibility is incomplete.",
+    )
 
     if artifacts:
         show_dataframe(pd.DataFrame({"model_artifact": [str(path.relative_to(BASE_DIR)) for path in artifacts]}))
@@ -1229,18 +1641,27 @@ def render_files_reproducibility() -> None:
 
 def main() -> None:
     st.set_page_config(
-        page_title="TSLA Stock Prediction Dashboard",
+        page_title="TSLA Stock Movement Prediction Dashboard",
         page_icon=":chart_with_upwards_trend:",
         layout="wide",
         initial_sidebar_state="expanded",
     )
 
-    st.sidebar.title("TSLA Experimental")
+    inject_custom_css()
+
+    st.sidebar.markdown(
+        """
+        <div class="sidebar-brand">
+          <div class="sidebar-logo"><span class="sidebar-accent">TSLA</span> Prediction Dashboard</div>
+          <div class="sidebar-subtitle">Research model, not financial advice</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     page = st.sidebar.radio(
         "Navigation",
         ["Overview", "Data", "Model Evaluation", "Latest Prediction", "Files / Reproducibility"],
     )
-    st.sidebar.caption("Research model, not financial advice")
 
     if page == "Overview":
         render_overview()
